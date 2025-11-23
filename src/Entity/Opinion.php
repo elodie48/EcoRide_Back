@@ -29,6 +29,9 @@ class Opinion
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\ManyToOne(inversedBy: 'opinions')]
+    private ?Carsharing $carsharing = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -90,6 +93,18 @@ class Opinion
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getCarsharing(): ?Carsharing
+    {
+        return $this->carsharing;
+    }
+
+    public function setCarsharing(?Carsharing $carsharing): static
+    {
+        $this->carsharing = $carsharing;
 
         return $this;
     }

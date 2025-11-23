@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CarsharingRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -43,6 +45,21 @@ class Carsharing
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    /**
+     * @var Collection<int, Opinion>
+     */
+    #[ORM\OneToMany(targetEntity: Opinion::class, mappedBy: 'carsharing')]
+    private Collection $opinions;
+
+    #[ORM\ManyToOne(inversedBy: 'carsharings')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Car $car = null;
+
+    public function __construct()
+    {
+        $this->opinions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -165,6 +182,48 @@ class Carsharing
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Opinion>
+     */
+    public function getOpinions(): Collection
+    {
+        return $this->opinions;
+    }
+
+    public function addOpinion(Opinion $opinion): static
+    {
+        if (!$this->opinions->contains($opinion)) {
+            $this->opinions->add($opinion);
+            $opinion->setCarsharing($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOpinion(Opinion $opinion): static
+    {
+        if ($this->opinions->removeElement($opinion)) {
+            // set the owning side to null (unless already changed)
+            if ($opinion->getCarsharing() === $this) {
+                $opinion->setCarsharing(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCar(): ?Car
+    {
+        return $this->car;
+    }
+
+    public function setCar(?Car $car): static
+    {
+        $this->car = $car;
 
         return $this;
     }

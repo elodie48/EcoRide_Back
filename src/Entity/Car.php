@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\CarRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -37,6 +39,17 @@ class Car
 
     #[ORM\Column(length: 50)]
     private ?string $brand = null;
+
+    /**
+     * @var Collection<int, Carsharing>
+     */
+    #[ORM\OneToMany(targetEntity: Carsharing::class, mappedBy: 'car')]
+    private Collection $carsharings;
+
+    public function __construct()
+    {
+        $this->carsharings = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -135,6 +148,36 @@ class Car
     public function setBrand(string $brand): static
     {
         $this->brand = $brand;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Carsharing>
+     */
+    public function getCarsharings(): Collection
+    {
+        return $this->carsharings;
+    }
+
+    public function addCarsharing(Carsharing $carsharing): static
+    {
+        if (!$this->carsharings->contains($carsharing)) {
+            $this->carsharings->add($carsharing);
+            $carsharing->setCar($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCarsharing(Carsharing $carsharing): static
+    {
+        if ($this->carsharings->removeElement($carsharing)) {
+            // set the owning side to null (unless already changed)
+            if ($carsharing->getCar() === $this) {
+                $carsharing->setCar(null);
+            }
+        }
 
         return $this;
     }
